@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from "react";
 
 
 export default function Home() {
-  const [messages, setMessages] = useState<String[]>([]);
-  // const [nameInput,setNameInput]= useState('')
-  // const [user,setUser] = useState('');
+  const [messages, setMessages] = useState<{username:String,content:String}[]>([]);
+  const [nameInput,setNameInput]= useState('')
+  const [user,setUser] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connected');
   const wsRef = useRef<WebSocket | null>(null);
@@ -22,7 +22,10 @@ export default function Home() {
           setConnectionStatus('disconnected');
       }
       ws.onmessage = (e) => {
-              setMessages((pre) => [...pre, e.data]);
+        const parsed=JSON.parse(e.data);
+        if(parsed.username && parsed.content) {
+          setMessages((pre) => [...pre, parsed]);
+        }
             
       }
       const pingInterval = setInterval(() => {
@@ -43,40 +46,40 @@ export default function Home() {
       if (!newMessage.trim()) return;
 
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(newMessage);
+          wsRef.current.send(JSON.stringify({username:user, content:newMessage}));
           setNewMessage('');
       }
   }
 
-  // if (!user) {
-  //     return (
-  //       <main className="h-screen flex items-center justify-center bg-gray-50">
-  //         <form
-  //           onSubmit={(e) => {
-  //             e.preventDefault();
-  //             if(nameInput.trim()) {
-  //                 setUser(nameInput)
-  //             }
-  //           }}
-  //           className="bg-white p-8 rounded shadow-lg space-y-4"
-  //         >
-  //           <h2 className="text-lg font-semibold text-gray-700">Enter your name</h2>
-  //           <input
-  //             type="text"
-  //             value={nameInput}
-  //             onChange={e=> {
-  //                 setNameInput(e.target.value)
-  //             }}
-  //             placeholder="Your name"
-  //             className="border px-4 py-2 rounded w-full"
-  //           />
-  //           <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded w-full">
-  //             Join Chat
-  //           </button>
-  //         </form>
-  //       </main>
-  //     );
-  //   }
+  if (!user) {
+      return (
+        <main className="h-screen flex items-center justify-center bg-gray-50">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if(nameInput.trim()) {
+                  setUser(nameInput)
+              }
+            }}
+            className="bg-white p-8 rounded shadow-lg space-y-4"
+          >
+            <h2 className="text-lg font-semibold text-gray-700">Enter your name</h2>
+            <input
+              type="text"
+              value={nameInput}
+              onChange={e=> {
+                  setNameInput(e.target.value)
+              }}
+              placeholder="Your name"
+              className="border px-4 py-2 rounded w-full"
+            />
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded w-full">
+              Join Chat
+            </button>
+          </form>
+        </main>
+      );
+    }
   return (
           <main className="flex justify-center min-h-screen items-center bg-gradient-to-b from-gray-400 to-gray-100">
               <div className="w-full max-w-2xl border border-gray-200 mx-4 bg-white rounded-xl shadow-lg flex flex-col h-[60vh] ">
@@ -97,7 +100,7 @@ export default function Home() {
                   <div className="flex-1 bg-gray-50 overflow-y-auto space-y-4">
                       {messages.map((message,index)=> (
                           <div key={index} className="bg-white p-2 rounded-lg  shadow-sm border border-gray-100 transition-all hover:shadow-md ">
-                              <p className=" font-medium text-shadow-amber-950">{message}</p>
+                              <p className=" font-medium text-shadow-amber-950">{message.username}: {message.content}</p>
                           </div>
                       ))}
                   </div>
