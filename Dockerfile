@@ -43,6 +43,7 @@ COPY --from=build /app /app
 # Entrypoint sets up the container.
 ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
+RUN npm install -g tsx
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+CMD ["npx","tsx","server.ts" ]

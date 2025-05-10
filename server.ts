@@ -23,7 +23,7 @@ nextApp.prepare().then(()=> {
             console.log(`message received: ${message}`)
             clients.forEach(client=> {
                 if(client.readyState===WebSocket.OPEN && (message.toString()!==`{"event":"ping"}`)) {
-                    client.send(message,{binary:isBinary});
+                    client.send(message,{binary : isBinary});
                 }
             })
         })
@@ -47,8 +47,9 @@ nextApp.prepare().then(()=> {
 
     })
 
-    server.listen(3000);
-    console.log('server listening on port 3000');
+    const port = process.env.PORT || 3000;
+    server.listen(port);
+    console.log(`server listening on port ${port}`);
     
 
 })
